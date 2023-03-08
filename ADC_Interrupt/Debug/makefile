@@ -60,8 +60,8 @@ all: main-build
 main-build: ADC_Interrupt.elf secondary-outputs
 
 # Tool invocations
-ADC_Interrupt.elf ADC_Interrupt.map: $(OBJS) $(USER_OBJS) D:\Code\ST_STM04F\ADC_Interrupt\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "ADC_Interrupt.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Code\ST_STM04F\ADC_Interrupt\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ADC_Interrupt.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+ADC_Interrupt.elf ADC_Interrupt.map: $(OBJS) $(USER_OBJS) D:\Code\STM32F4\ADC_Interrupt\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "ADC_Interrupt.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Code\STM32F4\ADC_Interrupt\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ADC_Interrupt.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
