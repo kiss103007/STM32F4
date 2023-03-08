@@ -1,0 +1,10 @@
+---- HAL_TIM_Base_MspInit Matches (9 in 3 files) ----
+Stm32f4xx_hal_msp.c (d:\code\st_stm04f\gpio\core\src):void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
+Stm32f4xx_hal_tim.c (d:\code\st_stm04f\gpio\drivers\stm32f4xx_hal_driver\src):           (++) Time Base : HAL_TIM_Base_MspInit()
+Stm32f4xx_hal_tim.c (d:\code\st_stm04f\gpio\drivers\stm32f4xx_hal_driver\src):      htim->Base_MspInitCallback = HAL_TIM_Base_MspInit;
+Stm32f4xx_hal_tim.c (d:\code\st_stm04f\gpio\drivers\stm32f4xx_hal_driver\src):    HAL_TIM_Base_MspInit(htim);
+Stm32f4xx_hal_tim.c (d:\code\st_stm04f\gpio\drivers\stm32f4xx_hal_driver\src):__weak void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
+Stm32f4xx_hal_tim.c (d:\code\st_stm04f\gpio\drivers\stm32f4xx_hal_driver\src):            the HAL_TIM_Base_MspInit could be implemented in the user file
+Stm32f4xx_hal_tim.c (d:\code\st_stm04f\gpio\drivers\stm32f4xx_hal_driver\src):        htim->Base_MspInitCallback              = HAL_TIM_Base_MspInit;
+Stm32f4xx_hal_tim.c (d:\code\st_stm04f\gpio\drivers\stm32f4xx_hal_driver\src):        htim->Base_MspInitCallback         = HAL_TIM_Base_MspInit;
+Stm32f4xx_hal_tim.h (d:\code\st_stm04f\gpio\drivers\stm32f4xx_hal_driver\inc):void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim);
