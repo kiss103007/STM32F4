@@ -327,6 +327,7 @@ HAL_StatusTypeDef HAL_CAN_Init(CAN_HandleTypeDef *hcan)
   {
     /* Init the low level hardware: CLOCK, NVIC */
     HAL_CAN_MspInit(hcan);
+
   }
 #endif /* (USE_HAL_CAN_REGISTER_CALLBACKS) */
 
@@ -1970,13 +1971,9 @@ void HAL_CAN_IRQHandler(CAN_HandleTypeDef *hcan)
       __HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_SLAKI);
 
       /* Sleep Callback */
-#if USE_HAL_CAN_REGISTER_CALLBACKS == 1
-      /* Call registered callback*/
-      hcan->SleepCallback(hcan);
-#else
+
       /* Call weak (surcharged) callback */
       HAL_CAN_SleepCallback(hcan);
-#endif /* USE_HAL_CAN_REGISTER_CALLBACKS */
     }
   }
 
@@ -1989,13 +1986,9 @@ void HAL_CAN_IRQHandler(CAN_HandleTypeDef *hcan)
       __HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_WKU);
 
       /* WakeUp Callback */
-#if USE_HAL_CAN_REGISTER_CALLBACKS == 1
-      /* Call registered callback*/
-      hcan->WakeUpFromRxMsgCallback(hcan);
-#else
+
       /* Call weak (surcharged) callback */
       HAL_CAN_WakeUpFromRxMsgCallback(hcan);
-#endif /* USE_HAL_CAN_REGISTER_CALLBACKS */
     }
   }
 
@@ -2084,13 +2077,9 @@ void HAL_CAN_IRQHandler(CAN_HandleTypeDef *hcan)
     hcan->ErrorCode |= errorcode;
 
     /* Call Error callback function */
-#if USE_HAL_CAN_REGISTER_CALLBACKS == 1
-    /* Call registered callback*/
-    hcan->ErrorCallback(hcan);
-#else
+
     /* Call weak (surcharged) callback */
     HAL_CAN_ErrorCallback(hcan);
-#endif /* USE_HAL_CAN_REGISTER_CALLBACKS */
   }
 }
 
