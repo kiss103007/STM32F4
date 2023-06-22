@@ -214,14 +214,14 @@ void TIM7_IRQHandler(void)
 
   /* USER CODE END TIM7_IRQn 0 */
   HAL_TIM_IRQHandler(&htim7);
-  /* USER CODE BEGIN TIM7_IRQn 1 */
-//  HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox);
-//  HAL_CAN_Start(&hcan2);
+
   if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox) != HAL_OK)
-           {
-         	//  printf("Can Send Fail\r\n");
-               Error_Handler();
-           }
+ 	{
+ 	   //  printf("Can Send Fail\r\n");
+ 	   Error_Handler();
+ 	}
+  /* USER CODE BEGIN TIM7_IRQn 1 */
+
   /* USER CODE END TIM7_IRQn 1 */
 }
 

@@ -26,15 +26,16 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-  // CAN 메시�??????? 구조�???????
+  // CAN 메시�??????????? 구조�???????????
 CAN_TxHeaderTypeDef TxHeader;
 uint8_t TxData[8];
 uint32_t TxMailbox;
 
 
-CAN_HandleTypeDef hcan1;
-CAN_HandleTypeDef hcan1;
-uint32_t TxMailbox;
+CAN_FilterTypeDef  sFilterConfig;   // ?��?�� ?��?�� 구조�?? �???��
+CAN_RxHeaderTypeDef   RxHeader;
+uint8_t               RxData[8];
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -60,6 +61,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_CAN2_Init(void);
 static void MX_TIM7_Init(void);
+static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -99,6 +101,9 @@ int main(void)
   MX_GPIO_Init();
   MX_CAN2_Init();
   MX_TIM7_Init();
+
+  /* Initialize interrupts */
+  MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
 
 	//Can Data����
@@ -106,23 +111,23 @@ int main(void)
 //	hcan2.pTxMsg->Data[2] = 0xBB;
 //	hcan2.pTxMsg->Data[1] = 0xCC;
 //	hcan2.pTxMsg->Data[0] = 0xDD;
-//	hcan2.pTxMsg->DLC = 4; /* ������ �������� ���� */
-	//hcan2.pTxMsg->ExtId = 0x1FFFFFE1; /* ǥ�� �ĺ��� + Ȯ�� �ĺ��� */
-	//hcan2.pTxMsg->IDE = CAN_ID_EXT; /* CAN_ID_EXT = 1 */
-	//hcan2.pTxMsg->RTR = CAN_RTR_DATA; /* CAN_RTR_DATA = 0 */
-//	hcan2.pTxMsg->StdId = 0x00000000; /* Ȯ�� �ĺ��ڸ� �����???? ���???? ������ ���� �������� 0���� Ŭ������ �д�. */
+///	hcan2.pTxMsg->DLC = 4; /* ������ �������� ���� */
+//	hcan2.pTxMsg->ExtId = 0x1FFFFFE1; /* ǥ�� �ĺ��� + Ȯ�� �ĺ��� */
+//	hcan2.pTxMsg->IDE = CAN_ID_EXT; /* CAN_ID_EXT = 1 */
+//	hcan2.pTxMsg->RTR = CAN_RTR_DATA; /* CAN_RTR_DATA = 0 */
+//	hcan2.pTxMsg->StdId = 0x00000000; /* Ȯ�� �ĺ��ڸ� �����???????? ���???????? ������ ���� �������� 0���� Ŭ������ �д�. */
 
-  if (HAL_CAN_Start(&hcan2) != HAL_OK)
-   {
-     /* Start Error */
-     Error_Handler();
-   }
+	if (HAL_CAN_Start(&hcan2) != HAL_OK)
+	{
+		/* Start Error */
+		Error_Handler();
+	}
 
    /* Configure Transmission process */
-   TxHeader.StdId = 8;                 // Standard Identifier, 0 ~ 0x7FF
-   TxHeader.ExtId = 0x01;                  // Extended Identifier, 0 ~ 0x1FFFFFFF
-   TxHeader.RTR = CAN_RTR_DATA;            // ?��?��?��?�� 메세�????�� ?��?��?�� ???��, DATA or REMOTE
-   TxHeader.IDE = CAN_ID_STD;              // ?��?��?��?�� 메세�????�� ?��별자 ???��, STD or EXT
+   TxHeader.StdId = 0x02;                 // Standard Identifier, 0 ~ 0x7FF
+   TxHeader.ExtId = 0;                  // Extended Identifier, 0 ~ 0x1FFFFFFF
+   TxHeader.RTR = CAN_RTR_DATA;            // ?��?��?��?�� 메세�????????�� ?��?��?�� ???��, DATA or REMOTE
+   TxHeader.IDE = CAN_ID_STD;              // ?��?��?��?�� 메세�????????�� ?��별자 ???��, STD or EXT
    TxHeader.DLC = 8;                       // ?��?�� ?��?��?�� 길이, 0 ~ 8 byte
    TxHeader.TransmitGlobalTime = DISABLE;  // ?��?��?�� ?��?�� ?��?��?�� ?�� timestamp counter 값을 capture.
 
@@ -147,6 +152,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+
   }
   /* USER CODE END 3 */
 }
@@ -187,14 +194,28 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief NVIC Configuration.
+  * @retval None
+  */
+static void MX_NVIC_Init(void)
+{
+  /* CAN2_TX_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(CAN2_TX_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(CAN2_TX_IRQn);
+  /* CAN2_RX0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
 }
 
 /**
@@ -213,7 +234,7 @@ static void MX_CAN2_Init(void)
 
   /* USER CODE END CAN2_Init 1 */
   hcan2.Instance = CAN2;
-  hcan2.Init.Prescaler = 12;
+  hcan2.Init.Prescaler = 21;
   hcan2.Init.Mode = CAN_MODE_NORMAL;
   hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan2.Init.TimeSeg1 = CAN_BS1_13TQ;
