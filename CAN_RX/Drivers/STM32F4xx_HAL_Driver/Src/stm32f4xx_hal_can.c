@@ -854,26 +854,8 @@ HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, CAN_FilterTypeDe
     assert_param(IS_CAN_FILTER_FIFO(sFilterConfig->FilterFIFOAssignment));
     assert_param(IS_CAN_FILTER_ACTIVATION(sFilterConfig->FilterActivation));
 
-#if defined(CAN3)
-    /* Check the CAN instance */
-    if (hcan->Instance == CAN3)
-    {
-      /* CAN3 is single instance with 14 dedicated filters banks */
 
-      /* Check the parameters */
-      assert_param(IS_CAN_FILTER_BANK_SINGLE(sFilterConfig->FilterBank));
-    }
-    else
-    {
-      /* CAN1 and CAN2 are dual instances with 28 common filters banks */
-      /* Select master instance to access the filter banks */
-      can_ip = CAN1;
 
-      /* Check the parameters */
-      assert_param(IS_CAN_FILTER_BANK_DUAL(sFilterConfig->FilterBank));
-      assert_param(IS_CAN_FILTER_BANK_DUAL(sFilterConfig->SlaveStartFilterBank));
-    }
-#elif defined(CAN2)
     /* CAN1 and CAN2 are dual instances with 28 common filters banks */
     /* Select master instance to access the filter banks */
     can_ip = CAN1;
@@ -881,31 +863,17 @@ HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, CAN_FilterTypeDe
     /* Check the parameters */
     assert_param(IS_CAN_FILTER_BANK_DUAL(sFilterConfig->FilterBank));
     assert_param(IS_CAN_FILTER_BANK_DUAL(sFilterConfig->SlaveStartFilterBank));
-#else
-    /* CAN1 is single instance with 14 dedicated filters banks */
 
-    /* Check the parameters */
-    assert_param(IS_CAN_FILTER_BANK_SINGLE(sFilterConfig->FilterBank));
-#endif
 
     /* Initialisation mode for the filter */
-    SET_BIT(can_ip->FMR, CAN_FMR_FINIT);
+    SET_BIT(can_ip->FMR, CAN_FMR_FINIT);   //FINT bit set
 
-#if defined(CAN3)
-    /* Check the CAN instance */
-    if (can_ip == CAN1)
-    {
-      /* Select the start filter number of CAN2 slave instance */
-      CLEAR_BIT(can_ip->FMR, CAN_FMR_CAN2SB);
-      SET_BIT(can_ip->FMR, sFilterConfig->SlaveStartFilterBank << CAN_FMR_CAN2SB_Pos);
-    }
 
-#elif defined(CAN2)
     /* Select the start filter number of CAN2 slave instance */
-    CLEAR_BIT(can_ip->FMR, CAN_FMR_CAN2SB);
-    SET_BIT(can_ip->FMR, sFilterConfig->SlaveStartFilterBank << CAN_FMR_CAN2SB_Pos);
+    CLEAR_BIT(can_ip->FMR, CAN_FMR_CAN2SB);	//CAN2SB bit clear
+    SET_BIT(can_ip->FMR, sFilterConfig->SlaveStartFilterBank << CAN_FMR_CAN2SB_Pos);//change the CAN2SBbits by SlaveStartFilterBank value
 
-#endif
+
     /* Convert filter number into bit position */
     filternbrbitpos = (uint32_t)1 << (sFilterConfig->FilterBank & 0x1FU);
 
@@ -1546,20 +1514,27 @@ HAL_StatusTypeDef HAL_CAN_GetRxMessage(CAN_HandleTypeDef *hcan, uint32_t RxFifo,
       }
     }
 
+    //hcan->Instance->sFIFOMailBox[RxFifo].RIR = 0x24600000
+    //hcan->Instance->sFIFOMailBox[RxFifo].RDTR = 8
+    //hcan->Instance->sFIFOMailBox[RxFifo].RDLR = 0x78563412
+    //hcan->Instance->sFIFOMailBox[RxFifo].RDHR = 0xf0dfbc9a
+
+
+
     /* Get the header */
     pHeader->IDE = CAN_RI0R_IDE & hcan->Instance->sFIFOMailBox[RxFifo].RIR;
     if (pHeader->IDE == CAN_ID_STD)
     {
-      pHeader->StdId = (CAN_RI0R_STID & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_TI0R_STID_Pos;
+      pHeader->StdId = (CAN_RI0R_STID & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_TI0R_STID_Pos;		//21번쉬프트
     }
     else
     {
-      pHeader->ExtId = ((CAN_RI0R_EXID | CAN_RI0R_STID) & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_RI0R_EXID_Pos;
+      pHeader->ExtId = ((CAN_RI0R_EXID | CAN_RI0R_STID) & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_RI0R_EXID_Pos;//3번쉬프트
     }
-    pHeader->RTR = (CAN_RI0R_RTR & hcan->Instance->sFIFOMailBox[RxFifo].RIR);
-    pHeader->DLC = (CAN_RDT0R_DLC & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_DLC_Pos;
-    pHeader->FilterMatchIndex = (CAN_RDT0R_FMI & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_FMI_Pos;
-    pHeader->Timestamp = (CAN_RDT0R_TIME & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_TIME_Pos;
+    pHeader->RTR = (CAN_RI0R_RTR & hcan->Instance->sFIFOMailBox[RxFifo].RIR);		//0x10
+    pHeader->DLC = (CAN_RDT0R_DLC & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_DLC_Pos;//
+    pHeader->FilterMatchIndex = (CAN_RDT0R_FMI & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_FMI_Pos;//8번쉬프트
+    pHeader->Timestamp = (CAN_RDT0R_TIME & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_TIME_Pos;	//16번 쉬프트
 
     /* Get the data */
     aData[0] = (uint8_t)((CAN_RDL0R_DATA0 & hcan->Instance->sFIFOMailBox[RxFifo].RDLR) >> CAN_RDL0R_DATA0_Pos);
@@ -1908,6 +1883,7 @@ void HAL_CAN_IRQHandler(CAN_HandleTypeDef *hcan)
 #else
       /* Call weak (surcharged) callback */
       HAL_CAN_RxFifo0MsgPendingCallback(hcan);
+
 #endif /* USE_HAL_CAN_REGISTER_CALLBACKS */
     }
   }

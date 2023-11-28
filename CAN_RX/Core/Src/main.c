@@ -43,7 +43,7 @@
 CAN_HandleTypeDef hcan2;
 
 /* USER CODE BEGIN PV */
-CAN_FilterTypeDef  sFilterConfig;   // ?��?�� ?��?�� 구조�??? �????��
+CAN_FilterTypeDef  sFilterConfig;   // ?��?�� ?��?�� 구조�??? �????��
 CAN_RxHeaderTypeDef   RxHeader;
 uint8_t               RxData[8];
 /* USER CODE END PV */
@@ -57,7 +57,6 @@ static void MX_NVIC_Init(void);
 // CAN ?��?�� ?��?��?��?�� 콜백
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *CanHandle)
 {
-//	printf("%s\r\n", __FUNCTION__);
   /* Get RX message */
   if (HAL_CAN_GetRxMessage(CanHandle, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
   {
@@ -115,15 +114,15 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  /* CAN Filter ?��?�� */
+  /* CAN Filter Init */
   sFilterConfig.FilterBank = 0;
-  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
-  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;		//0x00000000
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;	//0x00000001
   sFilterConfig.FilterIdHigh = 0x0000;
   sFilterConfig.FilterIdLow = 0x0000;
-  sFilterConfig.FilterMaskIdHigh = 0x0000;              // 0x00000000 = 모든 ID�??? 받아?��?��겠다
+  sFilterConfig.FilterMaskIdHigh = 0x0000;              // 0x00000000 = 모든 ID를 수신받는다.
   sFilterConfig.FilterMaskIdLow = 0x0000;
-  sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+  sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;	//0x00000000
   sFilterConfig.FilterActivation = ENABLE;
   sFilterConfig.SlaveStartFilterBank = 0;
 

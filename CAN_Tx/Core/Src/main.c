@@ -26,15 +26,10 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-  // CAN 메시�??????????? 구조�???????????
+
 CAN_TxHeaderTypeDef TxHeader;
 uint8_t TxData[8];
 uint32_t TxMailbox;
-
-
-CAN_FilterTypeDef  sFilterConfig;   // ?��?�� ?��?�� 구조�?? �???��
-CAN_RxHeaderTypeDef   RxHeader;
-uint8_t               RxData[8];
 
 /* USER CODE END PTD */
 
@@ -106,16 +101,6 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
 
-	//Can Data����
-//	hcan2.pTxMsg->Data[3] = 0xAA;
-//	hcan2.pTxMsg->Data[2] = 0xBB;
-//	hcan2.pTxMsg->Data[1] = 0xCC;
-//	hcan2.pTxMsg->Data[0] = 0xDD;
-///	hcan2.pTxMsg->DLC = 4; /* ������ �������� ���� */
-//	hcan2.pTxMsg->ExtId = 0x1FFFFFE1; /* ǥ�� �ĺ��� + Ȯ�� �ĺ��� */
-//	hcan2.pTxMsg->IDE = CAN_ID_EXT; /* CAN_ID_EXT = 1 */
-//	hcan2.pTxMsg->RTR = CAN_RTR_DATA; /* CAN_RTR_DATA = 0 */
-//	hcan2.pTxMsg->StdId = 0x00000000; /* Ȯ�� �ĺ��ڸ� �����???????? ���???????? ������ ���� �������� 0���� Ŭ������ �д�. */
 
 	if (HAL_CAN_Start(&hcan2) != HAL_OK)
 	{
@@ -126,10 +111,10 @@ int main(void)
    /* Configure Transmission process */
    TxHeader.StdId = 0x02;                 // Standard Identifier, 0 ~ 0x7FF
    TxHeader.ExtId = 0;                  // Extended Identifier, 0 ~ 0x1FFFFFFF
-   TxHeader.RTR = CAN_RTR_DATA;            // ?��?��?��?�� 메세�????????�� ?��?��?�� ???��, DATA or REMOTE
-   TxHeader.IDE = CAN_ID_STD;              // ?��?��?��?�� 메세�????????�� ?��별자 ???��, STD or EXT
-   TxHeader.DLC = 8;                       // ?��?�� ?��?��?�� 길이, 0 ~ 8 byte
-   TxHeader.TransmitGlobalTime = DISABLE;  // ?��?��?�� ?��?�� ?��?��?�� ?�� timestamp counter 값을 capture.
+   TxHeader.RTR = CAN_RTR_DATA;            // DATA or REMOTE
+   TxHeader.IDE = CAN_ID_STD;              // STD or EXT
+   TxHeader.DLC = 8;                       // 0 ~ 8 byte
+   TxHeader.TransmitGlobalTime = DISABLE;  // timestamp counter 값을 capture.
 
    /* Set the data to be transmitted */
    TxData[0] = 1;

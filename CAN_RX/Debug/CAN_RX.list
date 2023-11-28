@@ -39,13 +39,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_macro  0001f361  00000000  00000000  00027898  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00005c1b  00000000  00000000  00046bf9  2**0
+ 18 .debug_line   00005c19  00000000  00000000  00046bf9  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000be775  00000000  00000000  0004c814  2**0
+ 19 .debug_str    000be773  00000000  00000000  0004c812  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000050  00000000  00000000  0010af89  2**0
+ 20 .comment      00000050  00000000  00000000  0010af85  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  0000147c  00000000  00000000  0010afdc  2**2
+ 21 .debug_frame  0000147c  00000000  00000000  0010afd8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -363,7 +363,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *CanHandle)
  80004ce:	b082      	sub	sp, #8
  80004d0:	af00      	add	r7, sp, #0
  80004d2:	6078      	str	r0, [r7, #4]
-//	printf("%s\r\n", __FUNCTION__);
   /* Get RX message */
   if (HAL_CAN_GetRxMessage(CanHandle, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
  80004d4:	4b07      	ldr	r3, [pc, #28]	; (80004f4 <HAL_CAN_RxFifo0MsgPendingCallback+0x28>)
@@ -425,16 +424,16 @@ int main(void)
   MX_NVIC_Init();
  8000510:	f000 f8a8 	bl	8000664 <MX_NVIC_Init>
   /* USER CODE BEGIN 2 */
-  /* CAN Filter ?��?�� */
+  /* CAN Filter Init */
   sFilterConfig.FilterBank = 0;
  8000514:	4b1c      	ldr	r3, [pc, #112]	; (8000588 <main+0x8c>)
  8000516:	2200      	movs	r2, #0
  8000518:	615a      	str	r2, [r3, #20]
-  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;		//0x00000000
  800051a:	4b1b      	ldr	r3, [pc, #108]	; (8000588 <main+0x8c>)
  800051c:	2200      	movs	r2, #0
  800051e:	619a      	str	r2, [r3, #24]
-  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;	//0x00000001
  8000520:	4b19      	ldr	r3, [pc, #100]	; (8000588 <main+0x8c>)
  8000522:	2201      	movs	r2, #1
  8000524:	61da      	str	r2, [r3, #28]
@@ -446,7 +445,7 @@ int main(void)
  800052c:	4b16      	ldr	r3, [pc, #88]	; (8000588 <main+0x8c>)
  800052e:	2200      	movs	r2, #0
  8000530:	605a      	str	r2, [r3, #4]
-  sFilterConfig.FilterMaskIdHigh = 0x0000;              // 0x00000000 = 모든 ID�??? 받아?��?��겠다
+  sFilterConfig.FilterMaskIdHigh = 0x0000;              // 0x00000000 = 모든 ID를 수신받는다.
  8000532:	4b15      	ldr	r3, [pc, #84]	; (8000588 <main+0x8c>)
  8000534:	2200      	movs	r2, #0
  8000536:	609a      	str	r2, [r3, #8]
@@ -454,7 +453,7 @@ int main(void)
  8000538:	4b13      	ldr	r3, [pc, #76]	; (8000588 <main+0x8c>)
  800053a:	2200      	movs	r2, #0
  800053c:	60da      	str	r2, [r3, #12]
-  sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+  sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;	//0x00000000
  800053e:	4b12      	ldr	r3, [pc, #72]	; (8000588 <main+0x8c>)
  8000540:	2200      	movs	r2, #0
  8000542:	611a      	str	r2, [r3, #16]
@@ -1864,37 +1863,35 @@ HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, CAN_FilterTypeDe
  8000bfe:	7cfb      	ldrb	r3, [r7, #19]
  8000c00:	2b02      	cmp	r3, #2
  8000c02:	f040 80be 	bne.w	8000d82 <HAL_CAN_ConfigFilter+0x1a2>
-      assert_param(IS_CAN_FILTER_BANK_DUAL(sFilterConfig->SlaveStartFilterBank));
-    }
-#elif defined(CAN2)
+
+
+
     /* CAN1 and CAN2 are dual instances with 28 common filters banks */
     /* Select master instance to access the filter banks */
     can_ip = CAN1;
  8000c06:	4b65      	ldr	r3, [pc, #404]	; (8000d9c <HAL_CAN_ConfigFilter+0x1bc>)
  8000c08:	617b      	str	r3, [r7, #20]
-    /* Check the parameters */
-    assert_param(IS_CAN_FILTER_BANK_SINGLE(sFilterConfig->FilterBank));
-#endif
+    assert_param(IS_CAN_FILTER_BANK_DUAL(sFilterConfig->FilterBank));
+    assert_param(IS_CAN_FILTER_BANK_DUAL(sFilterConfig->SlaveStartFilterBank));
+
 
     /* Initialisation mode for the filter */
-    SET_BIT(can_ip->FMR, CAN_FMR_FINIT);
+    SET_BIT(can_ip->FMR, CAN_FMR_FINIT);   //FINT bit set
  8000c0a:	697b      	ldr	r3, [r7, #20]
  8000c0c:	f8d3 3200 	ldr.w	r3, [r3, #512]	; 0x200
  8000c10:	f043 0201 	orr.w	r2, r3, #1
  8000c14:	697b      	ldr	r3, [r7, #20]
  8000c16:	f8c3 2200 	str.w	r2, [r3, #512]	; 0x200
-      SET_BIT(can_ip->FMR, sFilterConfig->SlaveStartFilterBank << CAN_FMR_CAN2SB_Pos);
-    }
 
-#elif defined(CAN2)
+
     /* Select the start filter number of CAN2 slave instance */
-    CLEAR_BIT(can_ip->FMR, CAN_FMR_CAN2SB);
+    CLEAR_BIT(can_ip->FMR, CAN_FMR_CAN2SB);	//CAN2SB bit clear
  8000c1a:	697b      	ldr	r3, [r7, #20]
  8000c1c:	f8d3 3200 	ldr.w	r3, [r3, #512]	; 0x200
  8000c20:	f423 527c 	bic.w	r2, r3, #16128	; 0x3f00
  8000c24:	697b      	ldr	r3, [r7, #20]
  8000c26:	f8c3 2200 	str.w	r2, [r3, #512]	; 0x200
-    SET_BIT(can_ip->FMR, sFilterConfig->SlaveStartFilterBank << CAN_FMR_CAN2SB_Pos);
+    SET_BIT(can_ip->FMR, sFilterConfig->SlaveStartFilterBank << CAN_FMR_CAN2SB_Pos);//change the CAN2SBbits by SlaveStartFilterBank value
  8000c2a:	697b      	ldr	r3, [r7, #20]
  8000c2c:	f8d3 2200 	ldr.w	r2, [r3, #512]	; 0x200
  8000c30:	683b      	ldr	r3, [r7, #0]
@@ -1904,7 +1901,7 @@ HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, CAN_FilterTypeDe
  8000c38:	697b      	ldr	r3, [r7, #20]
  8000c3a:	f8c3 2200 	str.w	r2, [r3, #512]	; 0x200
 
-#endif
+
     /* Convert filter number into bit position */
     filternbrbitpos = (uint32_t)1 << (sFilterConfig->FilterBank & 0x1FU);
  8000c3e:	683b      	ldr	r3, [r7, #0]
@@ -2345,8 +2342,9 @@ HAL_StatusTypeDef HAL_CAN_GetRxMessage(CAN_HandleTypeDef *hcan, uint32_t RxFifo,
         return HAL_ERROR;
  8000e8a:	2301      	movs	r3, #1
  8000e8c:	e0d8      	b.n	8001040 <HAL_CAN_GetRxMessage+0x218>
-      }
-    }
+    //hcan->Instance->sFIFOMailBox[RxFifo].RDHR = 0xf0dfbc9a
+
+
 
     /* Get the header */
     pHeader->IDE = CAN_RI0R_IDE & hcan->Instance->sFIFOMailBox[RxFifo].RIR;
@@ -2366,7 +2364,7 @@ HAL_StatusTypeDef HAL_CAN_GetRxMessage(CAN_HandleTypeDef *hcan, uint32_t RxFifo,
  8000ea8:	2b00      	cmp	r3, #0
  8000eaa:	d10c      	bne.n	8000ec6 <HAL_CAN_GetRxMessage+0x9e>
     {
-      pHeader->StdId = (CAN_RI0R_STID & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_TI0R_STID_Pos;
+      pHeader->StdId = (CAN_RI0R_STID & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_TI0R_STID_Pos;		//21번쉬프트
  8000eac:	68fb      	ldr	r3, [r7, #12]
  8000eae:	681a      	ldr	r2, [r3, #0]
  8000eb0:	68bb      	ldr	r3, [r7, #8]
@@ -2382,7 +2380,7 @@ HAL_StatusTypeDef HAL_CAN_GetRxMessage(CAN_HandleTypeDef *hcan, uint32_t RxFifo,
     }
     else
     {
-      pHeader->ExtId = ((CAN_RI0R_EXID | CAN_RI0R_STID) & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_RI0R_EXID_Pos;
+      pHeader->ExtId = ((CAN_RI0R_EXID | CAN_RI0R_STID) & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_RI0R_EXID_Pos;//3번쉬프트
  8000ec6:	68fb      	ldr	r3, [r7, #12]
  8000ec8:	681a      	ldr	r2, [r3, #0]
  8000eca:	68bb      	ldr	r3, [r7, #8]
@@ -2395,7 +2393,7 @@ HAL_StatusTypeDef HAL_CAN_GetRxMessage(CAN_HandleTypeDef *hcan, uint32_t RxFifo,
  8000eda:	687b      	ldr	r3, [r7, #4]
  8000edc:	605a      	str	r2, [r3, #4]
     }
-    pHeader->RTR = (CAN_RI0R_RTR & hcan->Instance->sFIFOMailBox[RxFifo].RIR);
+    pHeader->RTR = (CAN_RI0R_RTR & hcan->Instance->sFIFOMailBox[RxFifo].RIR);		//0x10
  8000ede:	68fb      	ldr	r3, [r7, #12]
  8000ee0:	681a      	ldr	r2, [r3, #0]
  8000ee2:	68bb      	ldr	r3, [r7, #8]
@@ -2406,7 +2404,7 @@ HAL_StatusTypeDef HAL_CAN_GetRxMessage(CAN_HandleTypeDef *hcan, uint32_t RxFifo,
  8000eec:	f003 0202 	and.w	r2, r3, #2
  8000ef0:	687b      	ldr	r3, [r7, #4]
  8000ef2:	60da      	str	r2, [r3, #12]
-    pHeader->DLC = (CAN_RDT0R_DLC & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_DLC_Pos;
+    pHeader->DLC = (CAN_RDT0R_DLC & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_DLC_Pos;//
  8000ef4:	68fb      	ldr	r3, [r7, #12]
  8000ef6:	681a      	ldr	r2, [r3, #0]
  8000ef8:	68bb      	ldr	r3, [r7, #8]
@@ -2418,7 +2416,7 @@ HAL_StatusTypeDef HAL_CAN_GetRxMessage(CAN_HandleTypeDef *hcan, uint32_t RxFifo,
  8000f04:	f003 020f 	and.w	r2, r3, #15
  8000f08:	687b      	ldr	r3, [r7, #4]
  8000f0a:	611a      	str	r2, [r3, #16]
-    pHeader->FilterMatchIndex = (CAN_RDT0R_FMI & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_FMI_Pos;
+    pHeader->FilterMatchIndex = (CAN_RDT0R_FMI & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_FMI_Pos;//8번쉬프트
  8000f0c:	68fb      	ldr	r3, [r7, #12]
  8000f0e:	681a      	ldr	r2, [r3, #0]
  8000f10:	68bb      	ldr	r3, [r7, #8]
@@ -2431,7 +2429,7 @@ HAL_StatusTypeDef HAL_CAN_GetRxMessage(CAN_HandleTypeDef *hcan, uint32_t RxFifo,
  8000f1e:	b2da      	uxtb	r2, r3
  8000f20:	687b      	ldr	r3, [r7, #4]
  8000f22:	619a      	str	r2, [r3, #24]
-    pHeader->Timestamp = (CAN_RDT0R_TIME & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_TIME_Pos;
+    pHeader->Timestamp = (CAN_RDT0R_TIME & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_TIME_Pos;	//16번 쉬프트
  8000f24:	68fb      	ldr	r3, [r7, #12]
  8000f26:	681a      	ldr	r2, [r3, #0]
  8000f28:	68bb      	ldr	r3, [r7, #8]
